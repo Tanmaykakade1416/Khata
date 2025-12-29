@@ -33,7 +33,7 @@ A full-stack web application for tracking income, expenses, and visualizing your
 ## 📸 Screenshots
 
 ### Dashboard
-<img width="1412" height="905" alt="image" src="https://github.com/user-attachments/assets/090e799c-aaa5-4ca9-8712-0c193ddc345b" />
+<img width="900" height="605" alt="image" src="https://github.com/user-attachments/assets/090e799c-aaa5-4ca9-8712-0c193ddc345b" />
 
 
 ### Analytics
