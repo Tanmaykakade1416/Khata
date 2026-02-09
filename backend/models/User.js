@@ -27,8 +27,9 @@ const userSchema = new mongoose.Schema({
 });
 
 // Hash password before saving
+// Automatically hash password before saving (runs on registration & password updates)
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
+  if (!this.isModified("password")) {   // Skip if password unchanged
     return next();
   }
 
