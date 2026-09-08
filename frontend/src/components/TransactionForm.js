@@ -136,7 +136,6 @@ const TransactionForm = ({ onSubmit, editingTransaction, onCancelEdit }) => {
           value={formData.category}
           onChange={handleChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          required
         >
           <option value="">Select a category</option>
           {categories.map((cat) => (

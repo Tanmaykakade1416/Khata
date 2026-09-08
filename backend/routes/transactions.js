@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const Transaction = require("../models/Transaction");
 const { protect } = require("../middleware/auth");
+const getCategory = require("../utils/categorize");
 
 // All routes are protected - user must be logged in
 
@@ -25,6 +26,27 @@ router.get("/", protect, async (req, res) => {
 // @route   POST /api/transactions
 // @desc    Create a new transaction
 // @access  Private
+const EXPENSE_CATEGORIES = [
+  "Food & Dining",
+  "Transportation",
+  "Shopping",
+  "Entertainment",
+  "Bills & Utilities",
+  "Healthcare",
+  "Education",
+  "Travel",
+  "Personal Care",
+  "Other",
+];
+
+const INCOME_CATEGORIES = [
+  "Salary",
+  "Freelance",
+  "Business",
+  "Investment",
+  "Gift",
+  "Other",
+];
 router.post(
   "/",
   [
@@ -35,7 +57,17 @@ router.post(
     body("amount")
       .isFloat({ min: 0.01 })
       .withMessage("Amount must be a positive number"),
-    body("category").trim().notEmpty().withMessage("Category is required"),
+    body("category")
+      .trim()
+      .optional({ checkFalsy: true })
+      .custom((value, { req }) => {
+        const validList =
+          req.body.type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+        if (!validList.includes(value)) {
+          throw new Error(`Category must be one of: ${validList.join(", ")}`);
+        }
+        return true;
+      }),
     body("date").isISO8601().withMessage("Valid date is required"),
   ],
   async (req, res) => {
@@ -48,11 +80,16 @@ router.post(
     const { type, amount, category, description, date } = req.body;
 
     try {
+      // If category is blank, let AI pick one based on description
+      let finalCategory = category;
+      if (!finalCategory) {
+        finalCategory = await getCategory(description || "", type);
+      }
       const transaction = await Transaction.create({
         user: req.user._id,
         type,
         amount,
-        category,
+        category: finalCategory,
         description: description || "",
         date,
       });
@@ -62,7 +99,7 @@ router.post(
       console.error("Create transaction error:", error);
       res.status(500).json({ message: "Server error creating transaction" });
     }
-  }
+  },
 );
 
 // @route   PUT /api/transactions/:id
@@ -123,7 +160,7 @@ router.put(
       console.error("Update transaction error:", error);
       res.status(500).json({ message: "Server error updating transaction" });
     }
-  }
+  },
 );
 
 // @route   DELETE /api/transactions/:id
@@ -168,7 +205,7 @@ router.get("/summary", protect, async (req, res) => {
         }
         return acc;
       },
-      { totalIncome: 0, totalExpense: 0 }
+      { totalIncome: 0, totalExpense: 0 },
     );
 
     summary.balance = summary.totalIncome - summary.totalExpense;
