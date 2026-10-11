@@ -4,7 +4,7 @@ A full-stack web application for tracking income, expenses, and visualizing your
 
 ## 🚀 Live Demo
 
-**Try it here:** [https://khata-iota.vercel.app](https://khata-iota.vercel.app)
+**Try it here:** [https://khata-iota.vercel.app](https://khata-iota.vercel.app/)
 
 > Note: First load may take 30-50 seconds (free tier backend wakes from sleep)
 
