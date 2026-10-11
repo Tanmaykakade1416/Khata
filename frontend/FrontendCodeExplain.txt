@@ -1,0 +1,82 @@
+1. package.json
+"Lists all frontend dependencies including React for UI, axios for API calls, recharts for data
+visualization, and react-toastify for notifications. Tailwind CSS is used for styling. Scripts 
+include 'start' to run development server and 'build' to create production bundle."
+
+2. src/services/api.js
+"Creates an axios instance configured with the backend base URL. Uses request interceptor to 
+automatically attach the JWT token from localStorage to every API request in the Authorization
+Bearer header. This ensures all protected routes receive the authentication token without manually
+adding it each time."
+
+3. src/context/AuthContext.js
+"Manages global authentication state using React Context API. Provides login and logout 
+functions that store/remove token in localStorage and update user state. Checks for existing
+token on mount to maintain login across page refreshes. Makes auth state and functions available
+to all components without prop drilling."
+
+4. src/components/Auth.js
+"Login and register form component with tab switching. Handles form submission for both login and 
+register, calls API endpoints, stores token on success using AuthContext, and redirects to dashboard.
+Shows validation errors and success messages using react-toastify."
+
+5. src/components/Dashboard.js
+"Main application layout that fetches and displays user's transactions, summary data (total income, 
+expenses, balance), and charts. Contains TransactionForm for adding/editing, TransactionList for 
+displaying all transactions, and Charts component for visualizations. Handles logout functionality."
+
+6. src/components/TransactionForm.js
+"Form for creating and updating transactions. Contains hardcoded category arrays for income and 
+expense (Salary, Freelance for income; Food, Transport, Shopping for expense). Validates inputs, 
+handles edit mode by pre-filling form data, and submits to backend API. This is where category 
+options are defined in the frontend."
+
+7. src/components/TransactionList.js
+"Displays transactions in a table with edit and delete functionality. Shows transaction type 
+(income/expense), amount with color coding, category, description, and date. Provides edit and 
+delete buttons for each transaction. Handles empty state when no transactions exist."
+
+8. src/components/Charts.js
+"Visualizes transaction data using recharts library. Displays a pie chart showing expense 
+breakdown by category and a bar chart comparing monthly income versus expenses. Processes 
+transaction data to group by category and month for visualization."
+
+9. src/App.js
+"Main application component that handles routing logic. Uses AuthContext to check if user is logged 
+in. Shows Auth component (login/register) if not authenticated, shows Dashboard if authenticated. 
+Acts as the root component that wraps the entire application with AuthProvider."
+
+10. src/index.js
+"React entry point that renders the App component into the root DOM element. Wraps App with AuthProvider 
+to make authentication context available throughout the application. Imports global CSS styles 
+including Tailwind."
+
+11. src/index.css
+"Global stylesheet that imports Tailwind CSS base, components, and utilities directives. 
+Contains any custom global styles. Tailwind processes these directives to generate utility classes 
+used throughout the application."
+
+12. tailwind.config.js
+"Configures Tailwind CSS. Specifies which files to scan for class names (all JS/JSX files in src). 
+Extends default theme if needed. Enables Tailwind to purge unused styles in production for smaller 
+bundle size."
+
+13. postcss.config.js
+"Configures PostCSS plugins. Includes tailwindcss plugin to process Tailwind directives and 
+autoprefixer to add vendor prefixes for browser compatibility. Required for Tailwind CSS to work 
+properly."
+
+14. public/index.html
+"HTML template for the React app. Contains root div element where React app is mounted. Includes 
+meta tags for responsive design and PWA support. React replaces the root div content with the entire 
+application."
+
+🔄 COMPLETE FRONTEND FLOW (Interview Answer):
+"When the app loads, index.js renders App component wrapped in AuthProvider. App checks 
+authentication state from AuthContext - if token exists in localStorage, user is logged in and 
+sees Dashboard, otherwise sees Auth component. The api.js service automatically adds the stored 
+token to all API requests via axios interceptor. Dashboard fetches transactions and summary data, 
+passing them to child components. TransactionForm has hardcoded categories and handles CRUD 
+operations. TransactionList displays data in a table. Charts visualizes data using recharts. 
+All components use Tailwind CSS for styling. Authentication state is managed globally via Context 
+API, avoiding prop drilling."

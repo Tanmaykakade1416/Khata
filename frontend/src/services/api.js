@@ -21,7 +21,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Auth API calls
@@ -38,6 +38,8 @@ export const transactionAPI = {
     api.put(`/transactions/${id}`, transactionData),
   delete: (id) => api.delete(`/transactions/${id}`),
   getSummary: () => api.get("/transactions/summary"),
+  parse: ({ description, currentDate }) =>
+    api.post("/transactions/parse", { description, currentDate }),
 };
 
 export default api;

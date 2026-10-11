@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { transactionAPI } from "../services/api";
+import { toast } from "react-toastify";
 
 const EXPENSE_CATEGORIES = [
   "Food & Dining",
@@ -30,6 +32,10 @@ const TransactionForm = ({ onSubmit, editingTransaction, onCancelEdit }) => {
     description: "",
     date: new Date().toISOString().split("T")[0],
   });
+
+  const [parseText, setParseText] = useState("");
+  const [isParsing, setIsParsing] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
 
   useEffect(() => {
     if (editingTransaction) {
@@ -75,6 +81,43 @@ const TransactionForm = ({ onSubmit, editingTransaction, onCancelEdit }) => {
       description: "",
       date: new Date().toISOString().split("T")[0],
     });
+    setParseText("");
+    setShowQuickAdd(false);
+  };
+
+  const handleParse = async () => {
+    setIsParsing(true);
+    const currentDate = new Date().toISOString().split("T")[0];
+    const response = await transactionAPI.parse({
+      description: parseText,
+      currentDate,
+    });
+
+    if (response.data.success) {
+      setFormData({
+        type:
+          response.data.data.type !== null
+            ? response.data.data.type
+            : formData.type,
+        amount:
+          response.data.data.amount !== null
+            ? response.data.data.amount
+            : formData.amount,
+        category:
+          response.data.data.category !== null
+            ? response.data.data.category
+            : formData.category,
+        description: parseText,
+        date:
+          response.data.data.date !== null
+            ? response.data.data.date
+            : formData.date,
+      });
+    } else {
+      toast.error(response.data.message);
+    }
+
+    setIsParsing(false);
   };
 
   const categories =
@@ -82,6 +125,34 @@ const TransactionForm = ({ onSubmit, editingTransaction, onCancelEdit }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={() => setShowQuickAdd(!showQuickAdd)}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+        >
+          Quick Add
+        </button>
+
+        {showQuickAdd && (
+          <div className="mt-3 flex gap-2">
+            <input
+              type="text"
+              value={parseText}
+              onChange={(e) => setParseText(e.target.value)}
+              placeholder="e.g. spent 450 on groceries yesterday"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              type="button"
+              onClick={handleParse}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+            >
+              Parse
+            </button>
+          </div>
+        )}
+      </div>
       {/* Type Selection */}
       <div className="flex gap-4">
         <label className="flex-1">

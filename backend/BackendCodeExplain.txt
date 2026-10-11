@@ -1,0 +1,50 @@
+1. server.js:-
+server.js is the main entry point that orchestrates the entire backend. It loads environment variables using dotenv, creates an Express app, 
+and sets up middleware in order: CORS for cross-origin requests from frontend, JSON parser for request bodies, and URL-encoded parser for form data. 
+It connects to MongoDB using the URI from .env, exiting if connection fails since the app can't run without database. Routes are mounted at /api/auth 
+for authentication and /api/transactions for CRUD operations. A root route provides API documentation. Error handling middleware catches server errors 
+(showing details in development only) and a 404 handler catches unmatched routes. Finally, the server starts on the port from .env or defaults to 5000, 
+logging success messages to console.
+
+2. models/User.js:-
+User.js defines the user schema with three fields - name, email, and password. 
+Email is unique and validated with regex. Password is hashed using bcrypt before saving (pre-save hook).
+It also has a comparePassword method to verify login credentials.
+
+
+3.models/Transaction.js:-
+Transaction.js defines the transaction schema with fields like user (ObjectId reference), 
+type (income/expense with enum validation), amount (positive numbers only), category, description (optional), and date. 
+It has a compound index on user and date for faster queries.
+Category options are defined in the frontend, not in this schema.
+
+
+4. Middleware/auth.js:-
+Middleware acts as a gateway between user request and backend response.
+It checks authentication by verifying the JWT token whenever user uses transaction APIs.
+This is not used for login or register routes.
+
+5. routes/auth.js
+This file handles user registration and login. It has two public routes (no protect middleware needed). 
+The register route validates inputs using express-validator, checks if email already exists, 
+creates the user (password gets auto-hashed by User.js pre-save hook), generates a JWT token with user ID that expires in 30 days, 
+and returns user data with token. The login route validates inputs, finds user by email, verifies password using the comparePassword 
+method from User.js, generates a JWT token, and returns user data with token. Both routes use the generateToken helper function that 
+creates JWT tokens containing user ID in the payload. The token has three parts - header, payload (contains user ID), and signature. 
+After 30 days, the token expires and jwt.verify throws an error causing 401 response, requiring user to login again for a new token. 
+Security features include never returning passwords in responses and using generic error messages to prevent email enumeration attacks.
+
+6. transaction.js:-
+This file handles all CRUD operations for transactions. Every route uses protect middleware for authentication. GET route fetches all
+user's transactions sorted by date descending. POST route validates inputs (type, amount, category, date) and creates transaction linked to authenticated user.
+PUT route allows partial updates with optional validation, checks transaction exists and user owns it before updating. 
+DELETE route checks ownership before deleting. GET summary route calculates total income, expense, and balance using reduce. 
+All routes include proper error handling and return appropriate status codes (200, 201, 400, 403, 404, 500).
+
+7. .env:-
+The .env file stores environment variables - sensitive configuration data not committed to Git. 
+MONGODB_URI contains the database connection string (using MongoDB Atlas cloud with username, password, cluster URL). 
+JWT_SECRET is a random string used to sign and verify JWT tokens - must be kept secret to prevent token forgery. 
+PORT defines the backend server port (5000). CLIENT_URL specifies the frontend URL for CORS configuration, allowing only authorized origins to access the API. 
+These values are loaded using dotenv package and accessed via process.env throughout the application.
+

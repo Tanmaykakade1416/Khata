@@ -4,6 +4,7 @@ const { body, validationResult } = require("express-validator");
 const Transaction = require("../models/Transaction");
 const { protect } = require("../middleware/auth");
 const getCategory = require("../utils/categorize");
+const parseTransactionsText = require("../utils/parseTransaction");
 
 // All routes are protected - user must be logged in
 
@@ -187,6 +188,15 @@ router.delete("/:id", protect, async (req, res) => {
     console.error("Delete transaction error:", error);
     res.status(500).json({ message: "Server error deleting transaction" });
   }
+});
+
+// @route POST / api/transactions/parse
+// @desc    Parse the description
+// @access  Private
+router.post("/parse",protect ,async (req,res) =>{
+  const { description, currentDate }= req.body;
+  const parseText= await parseTransactionsText(description, currentDate);
+  res.json(parseText);
 });
 
 // @route   GET /api/transactions/summary
